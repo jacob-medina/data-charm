@@ -14,22 +14,30 @@ const readFile = (filename) => {
     });
 }
 
-async function readAllFiles() {
-    const schema = await readFile('schema.sql');
-    const seedDep = await readFile('seed-department.sql');
-    const seedRole = await readFile('seed-role.sql');
-    const seedEmployee = await readFile('seed-employee.sql');
-    const allFiles = [schema, seedDep, seedRole, seedEmployee];
+async function combineFiles(...filenames) {
+    const allFiles = []
+    for (filename of filenames) {
+        const file = await readFile(filename);
+        allFiles.push(file);
+    }
+
     return allFiles;
 }
 
-readAllFiles()
-.then((allFiles) => {
-    console.log('files', allFiles);
-    
+combineFiles(
+    'schema.sql',
+    'seed-department.sql',
+    'seed-role.sql',
+    'seed-employee.sql'
+)
+.then((allFiles) => {    
     const data = allFiles.reduce((data, file) => data + file + '\n\n', '');
-    console.log('data', data);
     fs.writeFile(path.join(__dirname, 'charm.sql'), data, (err) => {
-        if (err) console.error(err);
+        if (err) {
+            console.error(err);
+            return;
+        }
+
+        console.info('charm.sql successfully created!');
     });
 });
