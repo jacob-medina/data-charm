@@ -1,4 +1,4 @@
-INSERT INTO role(title, salary, department) VALUES
+INSERT INTO role(title, salary, department_id) VALUES
     ("Necromancer", 65, 1),
     ("Grand Summoner", 100, 1),
     ("Enchantress", 80, 2),
