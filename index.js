@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const mysql = require('mysql2');
 const inquirer = require('inquirer');
 
@@ -12,7 +14,7 @@ const db = mysql.createConnection({
 function query(...args) {
     const query = args[0];
     const placeholders = args.slice(1);
-    console.log(placeholders);
+
     db.execute(query, placeholders,
         (err, results) => {
             if (err) {
@@ -59,12 +61,15 @@ inquirer.prompt([
         
         case 'view all employees':
             query(
-                `SELECT employee.id, first_name AS "first name", last_name AS "last name", role.title, department.name AS department, salary, manager_id AS manager
-                FROM employee
-                JOIN role ON employee.role_id = role.id
-                JOIN department ON role.department_id = department.id
-                ORDER BY employee.id;`
+                `SELECT emp.id, emp.first_name AS "first name", emp.last_name AS "last name", role.title, department.name AS department, role.salary, CONCAT(manager.first_name, ' ', manager.last_name) AS "manager"
+                FROM employee emp
+                LEFT JOIN employee manager ON emp.manager_id = manager.id
+                LEFT JOIN role ON emp.role_id = role.id
+                LEFT JOIN department ON role.department_id = department.id
+                ORDER BY emp.id;`
             );
+
+            break;
         
         case 'add a department':
             inquirer.prompt([
@@ -80,18 +85,19 @@ inquirer.prompt([
                 );
             });
 
+            break;
+
         case 'add a role':
-            let choices = [];
             db.execute('SELECT * FROM department', (err, results) => {
                 if (err) return;
-
+                
+                let choices = [];
                 choices = results.map(result => {
                     return {
                         name: result.name,
                         value: result.id
                     };
                 });
-                console.log(choices);
 
                 inquirer.prompt([
                     {
@@ -121,7 +127,120 @@ inquirer.prompt([
                 });
             });
             
+            break;
+        
+        case 'add an employee':
+            db.execute('SELECT id, title FROM role', (err, results) => {
+                if (err) return;
+                
+                let roleChoices = [];
+                roleChoices = results.map(role => {
+                    return {
+                        name: role.title,
+                        value: role.id
+                    };
+                });
 
+                db.execute('SELECT id, first_name, last_name FROM employee', (err, results) => {
+                    if (err) return;
+                    
+                    // add all employees
+                    let managerChoices = [];
+                    managerChoices = results.map(emp => {
+                        return {
+                            name: `${emp.first_name} ${emp.last_name}`,
+                            value: emp.id
+                        };
+                    });
+
+                    // add 'no manager' choice to beginning
+                    managerChoices.unshift({
+                        name: 'None',
+                        value: null
+                    });
+
+                    inquirer.prompt([
+                        {
+                            name: 'emp fname',
+                            type: 'input',
+                            message: "What is the employee's first name?"
+                        },
+                        {
+                            name: 'emp lname',
+                            type: 'input',
+                            message: "What is the employee's last name?"
+                        },
+                        {
+                            name: 'emp role',
+                            type: 'list',
+                            choices: roleChoices,
+                            message: "What is the employee's role?"
+                        },
+                        {
+                            name: 'emp manager',
+                            type: 'list',
+                            choices: managerChoices,
+                            message: "Who is the employee's manager?"
+                        }
+                        
+                    ])
+                    .then(answer => {
+                        query(
+                            `INSERT INTO employee(first_name, last_name, role_id, manager_id) VALUES (?,?,?,?);`,
+                            answer['emp fname'], answer['emp lname'], answer['emp role'], answer['emp manager']
+                        );
+                    });
+                });
+            });
+
+            break;
+
+        case 'update an employee role':
+            db.execute('SELECT id, first_name, last_name FROM employee', (err, results) => {
+                if (err) return;
+                
+                let empChoices = [];
+                empChoices = results.map(emp => {
+                    return {
+                        name: `${emp.first_name} ${emp.last_name}`,
+                        value: emp.id
+                    };
+                });
+
+                db.execute('SELECT id, title FROM role', (err, results) => {
+                    if (err) return;
+                    
+                    let roleChoices = [];
+                    roleChoices = results.map(role => {
+                        return {
+                            name: role.title,
+                            value: role.id
+                        };
+                    });
+
+                    inquirer.prompt([
+                        {
+                            name: 'emp id',
+                            type: 'list',
+                            choices: empChoices,
+                            message: "Which employee's role do you want to update?"
+                        },
+                        {
+                            name: 'emp role_id',
+                            type: 'list',
+                            choices: roleChoices,
+                            message: 'Which role do you want to assign to the selected employee?'
+                        }
+                    ])
+                    .then(answer => {
+                        query(
+                            `UPDATE employee
+                            SET role_id = ?
+                            WHERE id = ?;`, answer['emp role_id'], answer['emp id']);
+                    });
+
+                })
+            });
 
             break;
         
