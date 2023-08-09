@@ -1,14 +1,13 @@
 require('dotenv').config();
-
 const mysql = require('mysql2');
 const inquirer = require('inquirer');
-const Table = require('./Table.js')
+const Table = require('./Table.js');
 
 const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '8MUU8Byp6b',
-    database: 'charm_db'
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME
 });
 
 
@@ -45,6 +44,7 @@ function mainChoice() {
             message: "What would you like to do?",
             choices: [
                 'view all departments',
+                'view budget by department',
                 'view all roles',
                 'view all employees',
                 'view all managers',
@@ -52,7 +52,8 @@ function mainChoice() {
                 'add a department',
                 'add a role',
                 'add an employee',
-                'update an employee role'
+                'update an employee role',
+                'quit'
             ]
         }
     ])
@@ -147,6 +148,18 @@ function mainChoice() {
                 
                 break;
 
+            
+            case 'view budget by department':
+                query(
+                    `SELECT department.id, department.name, SUM(role.salary) AS budget
+                    FROM employee
+                    JOIN role ON employee.role_id = role.id
+                    JOIN department ON role.department_id = department.id
+                    GROUP BY department.id;`
+                );
+
+                newMainChoice();
+                break;
             
             case 'add a department':
                 inquirer.prompt([
@@ -322,6 +335,10 @@ function mainChoice() {
                     });
                 });
     
+                break;
+            
+            case 'quit':
+                db.end();
                 break;
         }
     });
