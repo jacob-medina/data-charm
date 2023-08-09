@@ -1,8 +1,3 @@
-DROP DATABASE IF EXISTS charm_db;
-CREATE DATABASE charm_db;
-
-USE charm_db;
-
 CREATE TABLE department(
     id INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
     name VARCHAR(30) NOT NULL

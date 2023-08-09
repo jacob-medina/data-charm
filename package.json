@@ -1,7 +1,8 @@
 {
   "scripts": {
     "start": "node index.js",
-    "build": "node db/create-charm.js 75"
+    "build": "node db/create-charm.js 75",
+    "env": "node build-env.js"
   },
 
   "dependencies": {

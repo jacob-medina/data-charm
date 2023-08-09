@@ -45,29 +45,28 @@ async function start() {
         'seed-employee.sql'
     )
     .then((allFiles) => {    
-        const data = allFiles.reduce((data, file) => data + file + '\n\n', '');
-
+        const dbInit = `DROP DATABASE IF EXISTS ${process.env.DB_NAME};\nCREATE DATABASE ${process.env.DB_NAME};\nUSE ${process.env.DB_NAME};\n`;
+        const data = dbInit + '\n' + allFiles.reduce((data, file) => data + file + '\n\n', '');
+        
         db.connect(err => {
             if (err) throw err;
 
-            db.query(`DROP DATABASE IF EXISTS charm_db; CREATE DATABASE charm_db`, (err, results) => {
+            db.query(dbInit, (err, results) => {
                 if (err) throw err;
+                console.info(`${process.env.DB_NAME} initialized.`);
             });
         });
 
         db.query(data, (err, results) => {
             if (err) throw err;
+            console.info(`${process.env.DB_NAME} seeded.`);
         });
 
         db.end();
 
         fs.writeFile(path.join(__dirname, 'charm.sql'), data, (err) => {
-            if (err) {
-                console.error(err);
-                return;
-            }
-    
-            console.info('charm_db built and seeded!');
+            if (err) throw err;
+            console.info(`db/charm.sql created.`);
         });
     });
 }
