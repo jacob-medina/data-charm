@@ -2,7 +2,9 @@
 
 ## Description
 
-[Click here to see installation instructions.](#installation)
+[🏗️ Click here to see installation instructions.](#installation)
+
+[🎥 Walkthrough video of Data Charm.](https://drive.google.com/file/d/1hPdNtgsLX0rK1Fv75wOwLzagb95eXHQn/view?usp=sharing)
 
 Data Charm is a CMS (content management system) tool that helps companies handle important data, such as employees, roles, and departments.
 
@@ -12,7 +14,7 @@ Data Charm is a CMS (content management system) tool that helps companies handle
 
 The setup process made flexible using an `.env` file, which allows users to create a database and use their MySQL server based on their specifications.
 
-## Installation
+## 🏗️ Installation
 
 To install, first clone the repository:
 
@@ -23,7 +25,7 @@ Then, in the root directory of the project, install dependencies:
     npm install
 
 
-## Setup
+## 🛠️ Setup
 
 **This application requires a `.env` in the root directory** to use certain environment variables. You can create a template `.env` file by running:
 
@@ -43,7 +45,7 @@ To create the `charm_db` database and seed data, run:
     npm run build
 
 
-## Usage
+## 🪄 Usage
 
 To start Data Charm, run:
 
@@ -68,7 +70,7 @@ You may choose the following options in the current version of Data Charm:
 - Quit
 
 
-## Credits
+## 📝 Credits
 - `table` package (Output data as table): [table](https://www.npmjs.com/package/table)
 - `db/random-name` (Random name repository): [dominictarr](https://github.com/dominictarr/random-name/tree/master)
 - `dotenv` package (Create environment variables from .env): [scottmotte](https://www.npmjs.com/package/dotenv)
@@ -76,6 +78,6 @@ You may choose the following options in the current version of Data Charm:
 - [mysql2](https://www.npmjs.com/package/mysql2)
 
 
-## License
+## ⚖️ License
 
 This project is made under the [MIT License](./LICENSE).
